@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f2937">
+<link rel="manifest" href="./manifest.json">
+<title>建具金物位置計算ツール</title>
+
+<style>
+:root{
+  --bg1:#f7f9fc;
+  --bg2:#e9eef7;
+  --card:rgba(255,255,255,.92);
+  --border:#d7dfeb;
+  --border-strong:#c7d1e0;
+  --text:#1f2937;
+  --sub:#667085;
+  --accent:#2563eb;
+  --accent-soft:#eaf2ff;
+  --ok:#16a34a;
+  --warn:#d97706;
+  --danger:#dc2626;
+  --shadow:0 10px 28px rgba(15,23,42,.08);
+  --shadow-sm:0 3px 10px rgba(15,23,42,.06);
+  --radius:18px;
+  --radius-sm:12px;
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at top left,#ffffff 0%,var(--bg1) 35%,var(--bg2) 100%);
+  padding:10px 10px 22px;
+}
+
+.wrapper{
+  width:min(980px,100%);
+  margin:0 auto;
+}
+
+h1{
+  margin:10px 0 12px;
+  font-size:22px;
+  line-height:1.35;
+}
+
+h2{
+  margin:18px 0 10px;
+  font-size:16px;
+}
+
+h3{
+  margin:8px 0;
+  font-size:14px;
+}
+
+.card{
+  background:var(--card);
+  backdrop-filter:blur(10px);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);
+  padding:12px;
+  margin-bottom:12px;
+  transition:transform .15s ease, box-shadow .2s ease;
+}
+.card:active{
+  transform:translateY(1px);
+}
+
+.small{
+  font-size:12px;
+  color:var(--sub);
+  line-height:1.6;
+  margin:0 0 10px;
+}
+
+.label{
+  font-size:11px;
+  line-height:1.3;
+  color:#475467;
+  font-weight:700;
+  text-align:center;
+  margin-bottom:4px;
+}
+
+input,select,button{
+  width:100%;
+  min-height:40px;
+  border-radius:12px;
+  border:1px solid var(--border-strong);
+  padding:7px 6px;
+  font-size:16px;
+  background:#fff;
+  color:var(--text);
+  appearance:none;
+  -webkit-appearance:none;
+  transition:border-color .18s ease, box-shadow .18s ease, transform .08s ease, filter .12s ease;
+}
+
+input:focus,select:focus{
+  outline:none;
+  border-color:#75a3ff;
+  box-shadow:0 0 0 4px rgba(37,99,235,.14);
+}
+
+input[readonly]{
+  background:#f6f7f9;
+}
+
+button{
+  font-weight:800;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+button:active{
+  transform:scale(.98);
+}
+button:disabled{
+  opacity:.45;
+  cursor:default;
+  transform:none;
+}
+
+.frame{background:linear-gradient(180deg,#e7f1fb 0%,#dce9f5 100%);}
+.gap{background:linear-gradient(180deg,#e8f5e8 0%,#dfeadf 100%);}
+.door{background:linear-gradient(180deg,#f5ebda 0%,#efe3cd 100%);}
+.hinge{background:linear-gradient(180deg,#fbecef 0%,#f6e3e6 100%);}
+.strike{background:linear-gradient(180deg,#f3eefb 0%,#ede7f6 100%);}
+.flush{background:linear-gradient(180deg,#fffbe6 0%,#fff8d6 100%);}
+.total{background:linear-gradient(180deg,#f7f7f7 0%,#f1f1f1 100%);}
+
+.top-result-bar{
+  position:sticky;
+  top:0;
+  z-index:40;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(12px);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:10px 12px;
+  margin-bottom:10px;
+  box-shadow:var(--shadow);
+}
+.top-result-title{
+  font-size:12px;
+  color:var(--sub);
+  font-weight:700;
+  margin-bottom:4px;
+}
+.top-result-values{
+  font-size:14px;
+  line-height:1.6;
+  font-weight:800;
+}
+
+.toolbar{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:10px;
+}
+.quick-btn{
+  font-size:13px;
+  border:1px solid #c9dbff;
+  background:linear-gradient(180deg,#f4f8ff 0%,#e7f0ff 100%);
+  box-shadow:var(--shadow-sm);
+}
+
+.tab-bar{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:12px;
+  position:sticky;
+  top:74px;
+  z-index:35;
+}
+.tab-btn{
+  min-height:42px;
+  border-radius:14px;
+  border:1px solid var(--border-strong);
+  background:rgba(255,255,255,.88);
+  color:#334155;
+  box-shadow:var(--shadow-sm);
+}
+.tab-btn.active{
+  background:linear-gradient(180deg,#2a2f38 0%,#1f2937 100%);
+  color:#fff;
+  border-color:#1f2937;
+  transform:translateY(-2px);
+}
+
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+.formula-grid,
+.formula-grid-6,
+.formula-grid-4,
+.formula-grid-3{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:flex-end;
+}
+
+.box,.box-wide,.op-box{
+  flex:0 0 auto;
+}
+.box{width:84px;}
+.box-wide{width:174px;}
+.box.strike-long{width:90px;}
+
+.op-box{
+  width:20px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding-bottom:10px;
+}
+.op-mark{
+  width:20px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  font-weight:900;
+  color:#64748b;
+}
+
+.result-card{
+  background:linear-gradient(180deg,#fff8df 0%,#fff3c4 100%);
+  border:2px solid #e0b63f;
+  border-radius:18px;
+  box-shadow:0 6px 18px rgba(224,182,63,.14);
+  padding:16px;
+  white-space:pre-line;
+  line-height:1.8;
+  font-size:16px;
+  font-weight:700;
+}
+
+.message{
+  margin-top:8px;
+  padding:9px 10px;
+  border-radius:10px;
+  font-size:13px;
+  font-weight:700;
+  display:none;
+}
+.message.ok{background:#e8f5e9;color:#17643c;}
+.message.warn{background:#fff3e0;color:#9a5b00;}
+.message.info{background:#e3f2fd;color:#0c5c94;}
+
+.btn-add{background:linear-gradient(180deg,#f1fff3 0%,#e6f9ea 100%);}
+.btn-delete{background:linear-gradient(180deg,#fffafa 0%,#fff1f1 100%);}
+.btn-edit{background:linear-gradient(180deg,#f6f9ff 0%,#edf3ff 100%);}
+
+.manage-list{
+  display:grid;
+  gap:10px;
+}
+.item-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px;
+  box-shadow:var(--shadow-sm);
+}
+.item-title{
+  font-size:14px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+.item-meta{
+  font-size:13px;
+  color:#555;
+  line-height:1.6;
+  margin-bottom:8px;
+}
+.item-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.badge-default{
+  display:inline-block;
+  margin-left:6px;
+  padding:2px 8px;
+  border-radius:999px;
+  background:#f1f5f9;
+  font-size:11px;
+  color:#475569;
+  font-weight:700;
+}
+
+details.manage-section{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:var(--shadow-sm);
+  margin-bottom:12px;
+  overflow:hidden;
+}
+details.manage-section summary{
+  list-style:none;
+  cursor:pointer;
+  padding:14px 12px;
+  font-size:15px;
+  font-weight:800;
+  background:#fbfcfe;
+  border-bottom:1px solid #edf2f7;
+}
+details.manage-section summary::-webkit-details-marker{
+  display:none;
+}
+details.manage-section[open] summary{
+  background:#f5f8fc;
+}
+.manage-section-body{
+  padding:12px;
+}
+
+.section-divider{
+  height:1px;
+  background:#e8edf3;
+  margin:12px 0;
+}
+
+.footer-note{
+  margin-top:12px;
+  font-size:12px;
+  color:var(--sub);
+  line-height:1.6;
+}
+
+.input-hint{
+  margin-top:6px;
+  font-size:11px;
+  color:#94a3b8;
+  line-height:1.5;
+}
+
+.input-highlight{
+  border:2px solid #3b82f6 !important;
+  background:#eef6ff !important;
+}
+
+.input-flash{
+  animation:flash .22s ease;
+}
+@keyframes flash{
+  0%{filter:brightness(1.05);}
+  50%{box-shadow:0 0 0 5px rgba(59,130,246,.18);}
+  100%{filter:none;box-shadow:none;}
+}
+
+.copy-toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#222;
+  color:#fff;
+  padding:10px 16px;
+  border-radius:999px;
+  font-size:13px;
+  opacity:0;
+  transition:.3s;
+  z-index:999;
+}
+.copy-toast.show{
+  opacity:1;
+}
+
+@media (max-width:760px){
+  .toolbar,.tab-bar{
+    grid-template-columns:repeat(2,1fr);
+  }
+  .tab-bar{top:122px;}
+  .box{width:78px;}
+  .box-wide{width:162px;}
+  .box.strike-long{width:82px;}
+  .op-box{width:16px;}
+  .op-mark{width:16px;font-size:16px;}
+  h1{font-size:19px;}
+}
+
+@media (max-width:430px){
+  .box{width:72px;}
+  .box-wide{width:150px;}
+  .box.strike-long{width:76px;}
+  input,select,button{
+    min-height:38px;
+    font-size:16px;
+    padding:6px 4px;
+  }
+  .op-mark{
+    height:38px;
+    font-size:15px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <h1>丁番・ストライク・フランス落とし位置計算</h1>
+
+  <div class="top-result-bar">
+    <div class="top-result-title">主要結果</div>
+    <div id="quickResult" class="top-result-values">未入力</div>
+  </div>
+
+  <div class="toolbar">
+    <button class="quick-btn" type="button" onclick="presetDoor()">標準ドア</button>
+    <button class="quick-btn" type="button" onclick="presetFrame()">標準枠</button>
+    <button class="quick-btn" type="button" onclick="copyResult()">結果コピー</button>
+    <button class="quick-btn" type="button" onclick="scrollToGuide()">次の入力へ</button>
+  </div>
+
+  <div class="tab-bar">
+    <button type="button" class="tab-btn active" data-tab="tab-hinge">丁番</button>
+    <button type="button" class="tab-btn" data-tab="tab-strike">ストライク</button>
+    <button type="button" class="tab-btn" data-tab="tab-flush">フランス落とし</button>
+    <button type="button" class="tab-btn" data-tab="tab-manage">金物管理</button>
+  </div>
+
+  <div id="tab-hinge" class="tab-panel active">
+    <h2>丁番の種類</h2>
+    <div class="card">
+      <div class="formula-grid">
+        <div class="box-wide">
+          <div class="label">種類</div>
+          <select id="hingeSelect" class="hinge" autocomplete="off"></select>
+        </div>
+      </div>
+      <div class="input-hint">よく使う丁番をここで選択</div>
+    </div>
+
+    <h2>上側（上から）</h2>
+    <div class="card">
+      <div class="small">見付け ＋ 隙間 ＋ 基準 ＋ 丁番 = 上丁番</div>
+      <div class="formula-grid">
+        <div class="box">
+          <div class="label">見付け</div>
+          <input id="topMituke" class="frame" value="25" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="op-box"><div class="op-mark">＋</div></div>
+
+        <div class="box">
+          <div class="label">隙間</div>
+          <input id="topGap" class="gap" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="op-box"><div class="op-mark">＋</div></div>
+
+        <div class="box">
+          <div class="label">基準</div>
+          <input id="topBase" class="door" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="op-box"><div class="op-mark">＋</div></div>
+
+        <div class="box">
+          <div class="label">丁番</div>
+          <input id="hingeValueViewTop" class="hinge" readonly>
+        </div>
+        <div class="op-box"><div class="op-mark">＝</div></div>
+
+        <div class="box">
+          <div class="label">上丁番</div>
+          <input id="topDim" class="total" readonly>
+        </div>
+      </div>
+    </div>
+
+    <h2>下側（下から）</h2>
+    <div class="card">
+      <div class="small">沓摺① ＋ 沓摺② ＋ 隙間 ＋ 基準 － 丁番 = 下丁番</div>
+      <div class="formula-grid-6">
+        <div class="box">
+          <div class="label">沓摺①</div>
+          <input id="bottomSill1" class="frame" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="op-box"><div class="op-mark">＋</div></div>
+
+        <div class="box">
+          <div class="label">沓摺②</div>
+          <input id="bottomSill2" class="frame" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="op-box"><div class="op-mark">＋</div></div>
+
+        <div class="box">
+          <div class="label">隙間</div>
+          <input id="bottomGap" class="gap" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="op-box"><div class="op-mark">＋</div></div>
+
+        <div class="box">
+          <div class="label">基準</div>
+          <input id="bottomBase" class="door" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="op-box"><div class="op-mark">－</div></div>
+
+        <div class="box">
+          <div class="label">丁番</div>
+          <input id="hingeValueViewBottom" class="hinge" readonly>
+        </div>
+        <div class="op-box"><div class="op-mark">＝</div></div>
+
+        <div class="box">
+          <div class="label">下丁番</div>
+          <input id="bottomDim" class="total" readonly>
+        </div>
+      </div>
+    </div>
+
+    <h2>DH・枠全長</h2>
+    <div class="card">
+      <div class="small">枠全長 = 見付け + 上隙間 + DH + 下隙間 + 沓摺り合計</div>
+      <div class="formula-grid-4">
+        <div class="box-wide">
+          <div class="label">DH</div>
+          <input id="dh" class="door" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="box-wide">
+          <div class="label">枠全長</div>
+          <input id="frameLength" class="total" readonly>
+        </div>
+        <div class="box-wide">
+          <div class="label">丁番枚数</div>
+          <input id="hingeCount" class="door" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+        </div>
+      </div>
+      <div class="input-hint">枚数を入れるとピッチ計算に使う</div>
+    </div>
+
+    <h2>丁番追加</h2>
+    <div class="card">
+      <div class="formula-grid-4">
+        <div class="box-wide">
+          <div class="label">名前</div>
+          <input id="newHingeName" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="box">
+          <div class="label">値</div>
+          <input id="newHingeValue" class="hinge" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+        </div>
+        <div class="box-wide">
+          <div class="label">追加</div>
+          <button type="button" id="addHingeBtn" class="btn-add">＋ 追加</button>
+        </div>
+      </div>
+      <div id="hingeMessage" class="message"></div>
+    </div>
+  </div>
+
+  <div id="tab-strike" class="tab-panel">
+    <h2>ストライクの種類</h2>
+    <div class="card">
+      <div class="formula-grid">
+        <div class="box-wide">
+          <div class="label">種類</div>
+          <select id="strikeSelect" class="strike" autocomplete="off"></select>
+        </div>
+      </div>
+      <div class="input-hint">標準・追加済みストライクを選択</div>
+    </div>
+
+    <h2>ストライク（下から）</h2>
+    <div class="card">
+      <div class="small">枠下端～Hまで① ＋ 枠下端～Hまで② ＋ 基準値 － 下端 = 位置</div>
+      <div class="formula-grid-6">
+        <div class="box strike-long">
+          <div class="label">枠下端～H①</div>
+          <input id="strikeFromBottom1" class="frame" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="op-box"><div class="op-mark">＋</div></div>
+
+        <div class="box strike-long">
+          <div class="label">枠下端～H②</div>
+          <input id="strikeFromBottom2" class="frame" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="op-box"><div class="op-mark">＋</div></div>
+
+        <div class="box">
+          <div class="label">基準値</div>
+          <input id="strikeBase" class="door" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+        </div>
+        <div class="op-box"><div class="op-mark">－</div></div>
+
+        <div class="box">
+          <div class="label">下端</div>
+          <input id="strikeOffsetView" class="strike" readonly>
+        </div>
+        <div class="op-box"><div class="op-mark">＝</div></div>
+
+        <div class="box">
+          <div class="label">位置</div>
+          <input id="strikeResult" class="total" readonly>
+        </div>
+
+        <div class="box">
+          <div class="label">高さ</div>
+          <input id="strikeHeightView" class="strike" readonly>
+        </div>
+
+        <div class="box">
+          <div class="label">上端</div>
+          <input id="strikeTop" class="total" readonly>
+        </div>
+
+        <div class="box">
+          <div class="label">中心</div>
+          <input id="strikeCenter" class="total" readonly>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="small">厚み － 枠板厚 = 必要スペーサー</div>
+      <div class="formula-grid-4">
+        <div class="box">
+          <div class="label">厚み</div>
+          <input id="strikeThicknessView" class="strike" readonly>
+        </div>
+        <div class="op-box"><div class="op-mark">－</div></div>
+
+        <div class="box">
+          <div class="label">枠板厚</div>
+          <input id="frameThickness" class="frame" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+        </div>
+        <div class="op-box"><div class="op-mark">＝</div></div>
+
+        <div class="box-wide">
+          <div class="label">スペーサー</div>
+          <input id="spacerResult" class="total" readonly>
+        </div>
+      </div>
+    </div>
+
+    <h2>ストライク追加</h2>
+    <div class="card">
+      <div class="formula-grid-4">
+        <div class="box-wide">
+          <div class="label">名前</div>
+          <input id="newStrikeName" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="box">
+          <div class="label">下端</div>
+          <input id="newStrikeOffset" class="strike" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="box">
+          <div class="label">高さ</div>
+          <input id="newStrikeHeight" class="strike" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="box">
+          <div class="label">厚み</div>
+          <input id="newStrikeThickness" class="strike" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+        </div>
+        <div class="box-wide">
+          <div class="label">追加</div>
+          <button type="button" id="addStrikeBtn" class="btn-add">＋ 追加</button>
+        </div>
+      </div>
+      <div id="strikeMessage" class="message"></div>
+    </div>
+  </div>
+
+  <div id="tab-flush" class="tab-panel">
+    <h2>フランス落としの種類</h2>
+    <div class="card">
+      <div class="formula-grid">
+        <div class="box-wide">
+          <div class="label">種類</div>
+          <select id="flushSelect" class="flush" autocomplete="off"></select>
+        </div>
+      </div>
+      <div class="input-hint">親扉側の基準金物を選択</div>
+    </div>
+
+    <h2>フランス落とし</h2>
+    <div class="card">
+      <div class="small">親W ＋ 召合わせ/2 ＋ フランス落とし = 位置</div>
+      <div class="formula-grid">
+        <div class="box">
+          <div class="label">親W</div>
+          <input id="parentW" class="door" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="op-box"><div class="op-mark">＋</div></div>
+
+        <div class="box">
+          <div class="label">召合わせ</div>
+          <input id="meetingInput" class="frame" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+        </div>
+        <div class="op-box"><div class="op-mark">→</div></div>
+
+        <div class="box">
+          <div class="label">召合わせ/2</div>
+          <input id="meetingHalf" class="total" readonly>
+        </div>
+        <div class="op-box"><div class="op-mark">＋</div></div>
+
+        <div class="box">
+          <div class="label">フランス落とし</div>
+          <input id="flushValueView" class="flush" readonly>
+        </div>
+        <div class="op-box"><div class="op-mark">＝</div></div>
+
+        <div class="box">
+          <div class="label">位置</div>
+          <input id="flushResult" class="total" readonly>
+        </div>
+      </div>
+    </div>
+
+    <h2>フランス落とし追加</h2>
+    <div class="card">
+      <div class="formula-grid-4">
+        <div class="box-wide">
+          <div class="label">名前</div>
+          <input id="newFlushName" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="box">
+          <div class="label">値</div>
+          <input id="newFlushValue" class="flush" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+        </div>
+        <div class="box-wide">
+          <div class="label">追加</div>
+          <button type="button" id="addFlushBtn" class="btn-add">＋ 追加</button>
+        </div>
+      </div>
+      <div id="flushMessage" class="message"></div>
+    </div>
+  </div>
+
+  <div id="tab-manage" class="tab-panel">
+    <h2>金物管理</h2>
+
+    <div class="card">
+      <div class="small">追加済みの金物を一覧表示し、編集・削除できます。標準金物は削除できません。</div>
+
+      <details class="manage-section" open>
+        <summary><span id="hingeSummaryText">丁番一覧（0件）</span></summary>
+        <div class="manage-section-body">
+          <div id="hingeList" class="manage-list"></div>
+        </div>
+      </details>
+
+      <details class="manage-section">
+        <summary><span id="strikeSummaryText">ストライク一覧（0件）</span></summary>
+        <div class="manage-section-body">
+          <div id="strikeList" class="manage-list"></div>
+        </div>
+      </details>
+
+      <details class="manage-section">
+        <summary><span id="flushSummaryText">フランス落とし一覧（0件）</span></summary>
+        <div class="manage-section-body">
+          <div id="flushList" class="manage-list"></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h3>編集フォーム</h3>
+      <div class="small">一覧の「編集」を押すとここに内容が入ります。ストライクの値2は「高さ,厚み」で入力します。例: 110,2.5</div>
+
+      <div class="formula-grid-4">
+        <div class="box-wide">
+          <div class="label">種類</div>
+          <select id="manageType" autocomplete="off">
+            <option value="hinge">丁番</option>
+            <option value="strike">ストライク</option>
+            <option value="flush">フランス落とし</option>
+          </select>
+        </div>
+        <div class="box-wide">
+          <div class="label">名前</div>
+          <input id="manageName" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="box">
+          <div class="label">値1</div>
+          <input id="manageValue1" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+        </div>
+        <div class="box">
+          <div class="label">値2</div>
+          <input id="manageValue2" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+        </div>
+      </div>
+
+      <div class="formula-grid-4" style="margin-top:10px;">
+        <div class="box-wide">
+          <div class="label">更新</div>
+          <button type="button" id="manageSaveBtn" class="btn-edit">更新</button>
+        </div>
+        <div class="box-wide">
+          <div class="label">編集解除</div>
+          <button type="button" id="manageCancelBtn" class="btn-delete">編集解除</button>
+        </div>
+      </div>
+
+      <div id="manageMessage" class="message"></div>
+    </div>
+  </div>
+
+  <h2>計算結果</h2>
+  <div id="resultText" class="result-card">※ 必要項目を入力してください</div>
+
+  <div class="footer-note">
+    ※ オフライン対応済み<br>
+    ※ iPhoneのズーム防止・自動入力抑制対応済み<br>
+    ※ GitHub Pagesでそのまま公開可能
+  </div>
+
+</div>
+
+<div id="toast" class="copy-toast">コピーしました</div>
+
+<script>
+const APP_VERSION = "v1.0.0";
+const HINGE_STORAGE_KEY = "hingeCalculatorFullV1";
+const HINGE_SELECTED_KEY = "hingeCalculatorSelectedHingeFullV1";
+const STRIKE_STORAGE_KEY = "hingeCalculatorStrikesFullV1";
+const STRIKE_SELECTED_KEY = "hingeCalculatorSelectedStrikeFullV1";
+const FLUSH_STORAGE_KEY = "hingeCalculatorFlushesFullV1";
+const FLUSH_SELECTED_KEY = "hingeCalculatorSelectedFlushFullV1";
+
+let hinges = [];
+let strikes = [];
+let flushes = [];
+let manageEditing = { type: null, index: null };
+
+const defaultHinges = [
+  { name: "DH-508S（3+12）", value: 15, isDefault: true },
+  { name: "401-SL501（1+13）", value: 14, isDefault: true }
+];
+const defaultStrikes = [
+  { name: "LA", offset: 22.5, height: 110, thickness: 2.5, isDefault: true }
+];
+const defaultFlushes = [
+  { name: "DE6VN", value: 18.5, isDefault: true },
+  { name: "DC800", value: 20.5, isDefault: true }
+];
+
+function storageAvailable() {
+  try {
+    const test = "__storage_test__";
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch {
+    return false;
+  }
+}
+const canUseStorage = storageAvailable();
+
+function safeGet(key) {
+  if (!canUseStorage) return null;
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function safeSet(key, value) {
+  if (!canUseStorage) return;
+  try { localStorage.setItem(key, value); } catch {}
+}
+
+function toHalfWidth(str) {
+  return String(str)
+    .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248))
+    .replace(/－/g, "-")
+    .replace(/−/g, "-")
+    .replace(/ー/g, "-")
+    .replace(/．/g, ".")
+    .replace(/，/g, ".")
+    .replace(/　/g, " ");
+}
+function normalizeNumberInputValue(v) {
+  return toHalfWidth(v).replace(/[^\d.\-,]/g, "");
+}
+function getVal(id) {
+  const el = document.getElementById(id);
+  let v = el.value;
+  if (!v) return 0;
+  v = toHalfWidth(v).replace(/[^\d.\-]/g, "").trim();
+  if (v === "" || v === "-" || v === "." || v === "-.") return 0;
+  return Number(v) || 0;
+}
+function setValue(id, val) {
+  document.getElementById(id).value = (val || val === 0) ? val : "";
+}
+function showMessage(id, text, type) {
+  const box = document.getElementById(id);
+  box.textContent = text;
+  box.className = "message " + type;
+  box.style.display = "block";
+}
+function clearMessage(id) {
+  const box = document.getElementById(id);
+  box.textContent = "";
+  box.style.display = "none";
+  box.className = "message";
+}
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function normalizeHinge(item) {
+  return { name: String(item.name).trim(), value: Number(item.value), isDefault: Boolean(item.isDefault) };
+}
+function normalizeStrike(item) {
+  return {
+    name: String(item.name).trim(),
+    offset: Number(item.offset),
+    height: Number(item.height),
+    thickness: Number(item.thickness) || 0,
+    isDefault: Boolean(item.isDefault)
+  };
+}
+function normalizeFlush(item) {
+  return { name: String(item.name).trim(), value: Number(item.value), isDefault: Boolean(item.isDefault) };
+}
+
+function loadSavedHinges() {
+  try {
+    const raw = safeGet(HINGE_STORAGE_KEY);
+    if (!raw) {
+      hinges = defaultHinges.map(normalizeHinge);
+      return;
+    }
+    const parsed = JSON.parse(raw);
+    hinges = Array.isArray(parsed)
+      ? parsed.filter(item => item && typeof item.name === "string" && item.name.trim() !== "" && Number.isFinite(Number(item.value))).map(normalizeHinge)
+      : defaultHinges.map(normalizeHinge);
+
+    defaultHinges.forEach(def => {
+      const exists = hinges.some(h => h.name === def.name && Number(h.value) === Number(def.value));
+      if (!exists) hinges.unshift(normalizeHinge(def));
+    });
+  } catch {
+    hinges = defaultHinges.map(normalizeHinge);
+  }
+}
+function saveHinges() {
+  safeSet(HINGE_STORAGE_KEY, JSON.stringify(hinges));
+}
+
+function loadSavedStrikes() {
+  try {
+    const raw = safeGet(STRIKE_STORAGE_KEY);
+    if (!raw) {
+      strikes = defaultStrikes.map(normalizeStrike);
+      return;
+    }
+    const parsed = JSON.parse(raw);
+    strikes = Array.isArray(parsed)
+      ? parsed.filter(item =>
+          item &&
+          typeof item.name === "string" &&
+          item.name.trim() !== "" &&
+          Number.isFinite(Number(item.offset)) &&
+          Number.isFinite(Number(item.height))
+        ).map(normalizeStrike)
+      : defaultStrikes.map(normalizeStrike);
+
+    defaultStrikes.forEach(def => {
+      const exists = strikes.some(s =>
+        s.name === def.name &&
+        Number(s.offset) === Number(def.offset) &&
+        Number(s.height) === Number(def.height) &&
+        Number(s.thickness) === Number(def.thickness)
+      );
+      if (!exists) strikes.unshift(normalizeStrike(def));
+    });
+  } catch {
+    strikes = defaultStrikes.map(normalizeStrike);
+  }
+}
+function saveStrikes() {
+  safeSet(STRIKE_STORAGE_KEY, JSON.stringify(strikes));
+}
+
+function loadSavedFlushes() {
+  try {
+    const raw = safeGet(FLUSH_STORAGE_KEY);
+    if (!raw) {
+      flushes = defaultFlushes.map(normalizeFlush);
+      return;
+    }
+    const parsed = JSON.parse(raw);
+    flushes = Array.isArray(parsed)
+      ? parsed.filter(item => item && typeof item.name === "string" && item.name.trim() !== "" && Number.isFinite(Number(item.value))).map(normalizeFlush)
+      : defaultFlushes.map(normalizeFlush);
+
+    defaultFlushes.forEach(def => {
+      const exists = flushes.some(f => f.name === def.name && Number(f.value) === Number(def.value));
+      if (!exists) flushes.unshift(normalizeFlush(def));
+    });
+  } catch {
+    flushes = defaultFlushes.map(normalizeFlush);
+  }
+}
+function saveFlushes() {
+  safeSet(FLUSH_STORAGE_KEY, JSON.stringify(flushes));
+}
+
+function loadHingeOptions() {
+  const select = document.getElementById("hingeSelect");
+  const selectedBefore = select.value || safeGet(HINGE_SELECTED_KEY) || "";
+  select.innerHTML = "";
+  hinges.forEach((h, index) => {
+    select.add(new Option(h.isDefault ? `${h.name}（標準）` : h.name, index));
+  });
+  if (selectedBefore !== "") {
+    const idx = Number(selectedBefore);
+    if (Number.isInteger(idx) && idx >= 0 && idx < hinges.length) select.value = String(idx);
+  }
+  if (!select.value && hinges.length > 0) select.selectedIndex = 0;
+  safeSet(HINGE_SELECTED_KEY, select.value);
+}
+
+function loadStrikeOptions() {
+  const select = document.getElementById("strikeSelect");
+  const selectedBefore = select.value || safeGet(STRIKE_SELECTED_KEY) || "";
+  select.innerHTML = "";
+  strikes.forEach((s, index) => {
+    select.add(new Option(s.isDefault ? `${s.name}（標準）` : s.name, index));
+  });
+  if (selectedBefore !== "") {
+    const idx = Number(selectedBefore);
+    if (Number.isInteger(idx) && idx >= 0 && idx < strikes.length) select.value = String(idx);
+  }
+  if (!select.value && strikes.length > 0) select.selectedIndex = 0;
+  safeSet(STRIKE_SELECTED_KEY, select.value);
+}
+
+function loadFlushOptions() {
+  const select = document.getElementById("flushSelect");
+  const selectedBefore = select.value || safeGet(FLUSH_SELECTED_KEY) || "";
+  select.innerHTML = "";
+  flushes.forEach((f, index) => {
+    select.add(new Option(f.isDefault ? `${f.name}（標準）` : f.name, index));
+  });
+  if (selectedBefore !== "") {
+    const idx = Number(selectedBefore);
+    if (Number.isInteger(idx) && idx >= 0 && idx < flushes.length) select.value = String(idx);
+  }
+  if (!select.value && flushes.length > 0) select.selectedIndex = 0;
+  safeSet(FLUSH_SELECTED_KEY, select.value);
+}
+
+function getSelectedHinge() {
+  const idx = Number(document.getElementById("hingeSelect").value);
+  if (!Number.isInteger(idx) || idx < 0 || idx >= hinges.length) return null;
+  return hinges[idx];
+}
+function getSelectedStrike() {
+  const idx = Number(document.getElementById("strikeSelect").value);
+  if (!Number.isInteger(idx) || idx < 0 || idx >= strikes.length) return null;
+  return strikes[idx];
+}
+function getSelectedFlush() {
+  const idx = Number(document.getElementById("flushSelect").value);
+  if (!Number.isInteger(idx) || idx < 0 || idx >= flushes.length) return null;
+  return flushes[idx];
+}
+
+function addHingeFromTab() {
+  clearMessage("hingeMessage");
+  const name = document.getElementById("newHingeName").value.trim();
+  const value = getVal("newHingeValue");
+
+  if (!name) return showMessage("hingeMessage", "名前を入力してください", "warn");
+  if (!Number.isFinite(value) || value === 0) return showMessage("hingeMessage", "値を入力してください", "warn");
+
+  if (hinges.some(h => h.name.trim().toLowerCase() === name.toLowerCase())) {
+    return showMessage("hingeMessage", "登録済みです（同じ名前）", "warn");
+  }
+  if (hinges.some(h => Number(h.value) === Number(value))) {
+    return showMessage("hingeMessage", "登録済みです（同じ値）", "warn");
+  }
+
+  hinges.push({ name, value, isDefault: false });
+  saveHinges();
+  loadHingeOptions();
+  document.getElementById("hingeSelect").value = String(hinges.length - 1);
+  safeSet(HINGE_SELECTED_KEY, String(hinges.length - 1));
+  document.getElementById("newHingeName").value = "";
+  document.getElementById("newHingeValue").value = "";
+  refreshAllLists();
+  showMessage("hingeMessage", "追加しました", "ok");
+  calc();
+}
+
+function addStrikeFromTab() {
+  clearMessage("strikeMessage");
+  const name = document.getElementById("newStrikeName").value.trim();
+  const offset = getVal("newStrikeOffset");
+  const height = getVal("newStrikeHeight");
+  const thickness = getVal("newStrikeThickness");
+
+  if (!name) return showMessage("strikeMessage", "名前を入力してください", "warn");
+  if (!Number.isFinite(offset) || offset === 0 || !Number.isFinite(height) || height === 0) {
+    return showMessage("strikeMessage", "下端と高さを入力してください", "warn");
+  }
+  if (!Number.isFinite(thickness) || thickness === 0) {
+    return showMessage("strikeMessage", "厚みを入力してください", "warn");
+  }
+
+  if (strikes.some(s => s.name.trim().toLowerCase() === name.toLowerCase())) {
+    return showMessage("strikeMessage", "登録済みです（同じ名前）", "warn");
+  }
+  if (strikes.some(s =>
+    Number(s.offset) === Number(offset) &&
+    Number(s.height) === Number(height) &&
+    Number(s.thickness) === Number(thickness)
+  )) {
+    return showMessage("strikeMessage", "登録済みです（同じ寸法）", "warn");
+  }
+
+  strikes.push({ name, offset, height, thickness, isDefault: false });
+  saveStrikes();
+  loadStrikeOptions();
+  document.getElementById("strikeSelect").value = String(strikes.length - 1);
+  safeSet(STRIKE_SELECTED_KEY, String(strikes.length - 1));
+  document.getElementById("newStrikeName").value = "";
+  document.getElementById("newStrikeOffset").value = "";
+  document.getElementById("newStrikeHeight").value = "";
+  document.getElementById("newStrikeThickness").value = "";
+  refreshAllLists();
+  showMessage("strikeMessage", "追加しました", "ok");
+  calc();
+}
+
+function addFlushFromTab() {
+  clearMessage("flushMessage");
+  const name = document.getElementById("newFlushName").value.trim();
+  const value = getVal("newFlushValue");
+
+  if (!name) return showMessage("flushMessage", "名前を入力してください", "warn");
+  if (!Number.isFinite(value) || value === 0) return showMessage("flushMessage", "値を入力してください", "warn");
+
+  if (flushes.some(f => f.name.trim().toLowerCase() === name.toLowerCase())) {
+    return showMessage("flushMessage", "登録済みです（同じ名前）", "warn");
+  }
+  if (flushes.some(f => Number(f.value) === Number(value))) {
+    return showMessage("flushMessage", "登録済みです（同じ値）", "warn");
+  }
+
+  flushes.push({ name, value, isDefault: false });
+  saveFlushes();
+  loadFlushOptions();
+  document.getElementById("flushSelect").value = String(flushes.length - 1);
+  safeSet(FLUSH_SELECTED_KEY, String(flushes.length - 1));
+  document.getElementById("newFlushName").value = "";
+  document.getElementById("newFlushValue").value = "";
+  refreshAllLists();
+  showMessage("flushMessage", "追加しました", "ok");
+  calc();
+}
+
+function refreshHingeList() {
+  const box = document.getElementById("hingeList");
+  box.innerHTML = "";
+  hinges.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "item-card";
+    card.innerHTML = `
+      <div class="item-title">${escapeHtml(item.name)}${item.isDefault ? '<span class="badge-default">標準</span>' : ''}</div>
+      <div class="item-meta">値: ${item.value}</div>
+      <div class="item-actions">
+        <button type="button" class="btn-edit" data-action="edit" data-kind="hinge" data-index="${index}">編集</button>
+        <button type="button" class="btn-delete" data-action="delete" data-kind="hinge" data-index="${index}" ${item.isDefault ? "disabled" : ""}>削除</button>
+      </div>
+    `;
+    box.appendChild(card);
+  });
+}
+
+function refreshStrikeList() {
+  const box = document.getElementById("strikeList");
+  box.innerHTML = "";
+  strikes.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "item-card";
+    card.innerHTML = `
+      <div class="item-title">${escapeHtml(item.name)}${item.isDefault ? '<span class="badge-default">標準</span>' : ''}</div>
+      <div class="item-meta">下端: ${item.offset} / 高さ: ${item.height} / 厚み: ${item.thickness}</div>
+      <div class="item-actions">
+        <button type="button" class="btn-edit" data-action="edit" data-kind="strike" data-index="${index}">編集</button>
+        <button type="button" class="btn-delete" data-action="delete" data-kind="strike" data-index="${index}" ${item.isDefault ? "disabled" : ""}>削除</button>
+      </div>
+    `;
+    box.appendChild(card);
+  });
+}
+
+function refreshFlushList() {
+  const box = document.getElementById("flushList");
+  box.innerHTML = "";
+  flushes.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "item-card";
+    card.innerHTML = `
+      <div class="item-title">${escapeHtml(item.name)}${item.isDefault ? '<span class="badge-default">標準</span>' : ''}</div>
+      <div class="item-meta">値: ${item.value}</div>
+      <div class="item-actions">
+        <button type="button" class="btn-edit" data-action="edit" data-kind="flush" data-index="${index}">編集</button>
+        <button type="button" class="btn-delete" data-action="delete" data-kind="flush" data-index="${index}" ${item.isDefault ? "disabled" : ""}>削除</button>
+      </div>
+    `;
+    box.appendChild(card);
+  });
+}
+
+function refreshSummaryCounts() {
+  document.getElementById("hingeSummaryText").textContent = `丁番一覧（${hinges.length}件）`;
+  document.getElementById("strikeSummaryText").textContent = `ストライク一覧（${strikes.length}件）`;
+  document.getElementById("flushSummaryText").textContent = `フランス落とし一覧（${flushes.length}件）`;
+}
+
+function refreshAllLists() {
+  refreshHingeList();
+  refreshStrikeList();
+  refreshFlushList();
+  refreshSummaryCounts();
+}
+
+function startManageEdit(kind, index) {
+  clearMessage("manageMessage");
+  manageEditing = { type: kind, index };
+  document.getElementById("manageType").value = kind;
+
+  if (kind === "hinge") {
+    const item = hinges[index];
+    document.getElementById("manageName").value = item.name;
+    document.getElementById("manageValue1").value = item.value;
+    document.getElementById("manageValue2").value = "";
+  }
+  if (kind === "strike") {
+    const item = strikes[index];
+    document.getElementById("manageName").value = item.name;
+    document.getElementById("manageValue1").value = item.offset;
+    document.getElementById("manageValue2").value = item.height + "," + item.thickness;
+  }
+  if (kind === "flush") {
+    const item = flushes[index];
+    document.getElementById("manageName").value = item.name;
+    document.getElementById("manageValue1").value = item.value;
+    document.getElementById("manageValue2").value = "";
+  }
+}
+
+function clearManageEdit() {
+  manageEditing = { type: null, index: null };
+  document.getElementById("manageType").value = "hinge";
+  document.getElementById("manageName").value = "";
+  document.getElementById("manageValue1").value = "";
+  document.getElementById("manageValue2").value = "";
+}
+
+function parseStrikeExtra(text) {
+  const raw = toHalfWidth(text).split(",");
+  const h = Number((raw[0] || "").trim()) || 0;
+  const t = Number((raw[1] || "").trim()) || 0;
+  return { height: h, thickness: t };
+}
+
+function saveManageEdit() {
+  clearMessage("manageMessage");
+  const kind = manageEditing.type;
+  const index = manageEditing.index;
+  if (kind === null || index === null) {
+    return showMessage("manageMessage", "一覧から編集する項目を選んでください", "warn");
+  }
+
+  const name = document.getElementById("manageName").value.trim();
+  const v1 = Number(normalizeNumberInputValue(document.getElementById("manageValue1").value)) || 0;
+  const v2raw = document.getElementById("manageValue2").value;
+
+  if (!name) return showMessage("manageMessage", "名前を入力してください", "warn");
+
+  if (kind === "hinge") {
+    if (!v1) return showMessage("manageMessage", "値を入力してください", "warn");
+    const duplicateName = hinges.some((x, i) => i !== index && x.name.trim().toLowerCase() === name.toLowerCase());
+    const duplicateValue = hinges.some((x, i) => i !== index && Number(x.value) === Number(v1));
+    if (duplicateName) return showMessage("manageMessage", "登録済みです（同じ名前）", "warn");
+    if (duplicateValue) return showMessage("manageMessage", "登録済みです（同じ値）", "warn");
+    hinges[index].name = name;
+    hinges[index].value = v1;
+    saveHinges();
+    loadHingeOptions();
+  }
+
+  if (kind === "strike") {
+    if (!v1) return showMessage("manageMessage", "下端を入力してください", "warn");
+    const extra = parseStrikeExtra(v2raw);
+    if (!extra.height || !extra.thickness) {
+      return showMessage("manageMessage", "値2に『高さ,厚み』の形で入力してください 例: 110,2.5", "warn");
+    }
+    const duplicateName = strikes.some((x, i) => i !== index && x.name.trim().toLowerCase() === name.toLowerCase());
+    const duplicateDims = strikes.some((x, i) =>
+      i !== index &&
+      Number(x.offset) === Number(v1) &&
+      Number(x.height) === Number(extra.height) &&
+      Number(x.thickness) === Number(extra.thickness)
+    );
+    if (duplicateName) return showMessage("manageMessage", "登録済みです（同じ名前）", "warn");
+    if (duplicateDims) return showMessage("manageMessage", "登録済みです（同じ寸法）", "warn");
+    strikes[index].name = name;
+    strikes[index].offset = v1;
+    strikes[index].height = extra.height;
+    strikes[index].thickness = extra.thickness;
+    saveStrikes();
+    loadStrikeOptions();
+  }
+
+  if (kind === "flush") {
+    if (!v1) return showMessage("manageMessage", "値を入力してください", "warn");
+    const duplicateName = flushes.some((x, i) => i !== index && x.name.trim().toLowerCase() === name.toLowerCase());
+    const duplicateValue = flushes.some((x, i) => i !== index && Number(x.value) === Number(v1));
+    if (duplicateName) return showMessage("manageMessage", "登録済みです（同じ名前）", "warn");
+    if (duplicateValue) return showMessage("manageMessage", "登録済みです（同じ値）", "warn");
+    flushes[index].name = name;
+    flushes[index].value = v1;
+    saveFlushes();
+    loadFlushOptions();
+  }
+
+  refreshAllLists();
+  clearManageEdit();
+  showMessage("manageMessage", "更新しました", "ok");
+  calc();
+}
+
+function deleteManaged(kind, index) {
+  clearMessage("manageMessage");
+  if (kind === "hinge") {
+    const item = hinges[index];
+    if (!item || item.isDefault) return showMessage("manageMessage", "標準の丁番は削除できません", "warn");
+    hinges.splice(index, 1);
+    saveHinges();
+    loadHingeOptions();
+  }
+  if (kind === "strike") {
+    const item = strikes[index];
+    if (!item || item.isDefault) return showMessage("manageMessage", "標準のストライクは削除できません", "warn");
+    strikes.splice(index, 1);
+    saveStrikes();
+    loadStrikeOptions();
+  }
+  if (kind === "flush") {
+    const item = flushes[index];
+    if (!item || item.isDefault) return showMessage("manageMessage", "標準のフランス落としは削除できません", "warn");
+    flushes.splice(index, 1);
+    saveFlushes();
+    loadFlushOptions();
+  }
+
+  if (manageEditing.type === kind && manageEditing.index === index) clearManageEdit();
+  refreshAllLists();
+  showMessage("manageMessage", "削除しました", "info");
+  calc();
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.tab === tabId);
+  });
+  document.querySelectorAll(".tab-panel").forEach(panel => {
+    panel.classList.toggle("active", panel.id === tabId);
+  });
+}
+
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+});
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const kind = btn.dataset.kind;
+  const index = Number(btn.dataset.index);
+  const action = btn.dataset.action;
+
+  if (action === "edit") startManageEdit(kind, index);
+  if (action === "delete") deleteManaged(kind, index);
+});
+
+function calc() {
+  const topMituke = getVal("topMituke");
+  const topGap = getVal("topGap");
+  const topBase = getVal("topBase");
+
+  const bottomSill = getVal("bottomSill1") + getVal("bottomSill2");
+  const bottomGap = getVal("bottomGap");
+  const bottomBase = getVal("bottomBase");
+
+  const dh = getVal("dh");
+  const count = Math.floor(getVal("hingeCount"));
+
+  const selectedHinge = getSelectedHinge();
+  const hingeValue = selectedHinge ? Number(selectedHinge.value) : 0;
+
+  setValue("hingeValueViewTop", hingeValue || "");
+  setValue("hingeValueViewBottom", hingeValue || "");
+
+  const topDim = topMituke + topGap + topBase + hingeValue;
+  const bottomDim = bottomSill + bottomGap + bottomBase - hingeValue;
+  const frameLength = topMituke + topGap + dh + bottomGap + bottomSill;
+
+  setValue("topDim", topDim || "");
+  setValue("bottomDim", bottomDim || "");
+  setValue("frameLength", frameLength || "");
+
+  const selectedStrike = getSelectedStrike();
+  const strikeOffset = selectedStrike ? Number(selectedStrike.offset) : 0;
+  const strikeHeight = selectedStrike ? Number(selectedStrike.height) : 0;
+  const strikeThickness = selectedStrike ? Number(selectedStrike.thickness) : 0;
+
+  setValue("strikeOffsetView", strikeOffset || "");
+  setValue("strikeHeightView", strikeHeight || "");
+  setValue("strikeThicknessView", strikeThickness || "");
+
+  const strikeFromBottom = getVal("strikeFromBottom1") + getVal("strikeFromBottom2");
+  const strikeBase = getVal("strikeBase");
+  const strikeResult = strikeFromBottom + strikeBase - strikeOffset;
+
+  setValue("strikeResult", strikeResult || "");
+
+  const strikeTop = strikeResult + strikeHeight;
+  const strikeCenter = strikeResult + strikeHeight / 2;
+
+  setValue("strikeTop", strikeTop || "");
+  setValue("strikeCenter", strikeCenter || "");
+
+  const frameThickness = getVal("frameThickness");
+  const spacer = strikeThickness - frameThickness;
+  setValue("spacerResult", spacer > 0 ? spacer.toFixed(1) : spacer === 0 ? "0" : "");
+
+  const selectedFlush = getSelectedFlush();
+  const flushValue = selectedFlush ? Number(selectedFlush.value) : 0;
+  setValue("flushValueView", flushValue || "");
+
+  const parentW = getVal("parentW");
+  const meetingInput = getVal("meetingInput");
+  const meetingHalf = meetingInput / 2;
+  const flushResult = parentW + meetingHalf + flushValue;
+
+  setValue("meetingHalf", meetingHalf || "");
+  setValue("flushResult", flushResult || "");
+
+  safeSet(HINGE_SELECTED_KEY, document.getElementById("hingeSelect").value);
+  safeSet(STRIKE_SELECTED_KEY, document.getElementById("strikeSelect").value);
+  safeSet(FLUSH_SELECTED_KEY, document.getElementById("flushSelect").value);
+
+  const result = document.getElementById("resultText");
+  let text = "";
+
+  if (frameLength > 0 && topDim > 0 && bottomDim > 0 && count >= 2) {
+    const usableLength = frameLength - topDim - bottomDim;
+    if (usableLength < 0) {
+      text += "■ 丁番\n";
+      text += "※ 枠全長より上下寸法の合計が大きくなっています\n\n";
+    } else {
+      const pitch = usableLength / (count - 1);
+      const positions = [];
+      for (let i = 0; i < count; i++) positions.push(topDim + pitch * i);
+
+      text += "■ 丁番\n";
+      text += "枠全長: " + frameLength.toFixed(1) + " mm\n";
+      text += "ピッチ: " + pitch.toFixed(1) + " mm\n";
+      positions.forEach((p, i) => {
+        text += (i + 1) + "枚目: " + p.toFixed(1) + " mm\n";
+      });
+      text += "\n";
+    }
+  } else {
+    text += "■ 丁番\n";
+    text += "※ DH・上下寸法・丁番枚数を入力してください\n\n";
+  }
+
+  text += "■ ストライク\n";
+  if (strikeResult > 0) {
+    text += "下端位置: " + strikeResult.toFixed(1) + " mm\n";
+    if (strikeHeight > 0) {
+      text += "高さ: " + strikeHeight.toFixed(1) + " mm\n";
+      text += "上端: " + strikeTop.toFixed(1) + " mm\n";
+      text += "中心: " + strikeCenter.toFixed(1) + " mm\n";
+    }
+    if (strikeThickness > 0) {
+      text += "厚み: " + strikeThickness.toFixed(1) + " mm\n";
+    }
+    if (frameThickness > 0) {
+      text += "枠板厚: " + frameThickness.toFixed(1) + " mm\n";
+    }
+    if (spacer > 0) {
+      text += "必要スペーサー: " + spacer.toFixed(1) + " mm\n";
+    }
+    if (spacer < 0) {
+      text += "※ 枠板厚のほうが厚いため確認が必要です\n";
+    }
+  } else {
+    text += "※ 必要項目を入力してください\n";
+  }
+  text += "\n";
+
+  text += "■ フランス落とし\n";
+  if (flushResult > 0) {
+    text += "位置: " + flushResult.toFixed(1) + " mm\n";
+    text += "親W: " + parentW.toFixed(1) + " mm\n";
+    text += "召合わせ/2: " + meetingHalf.toFixed(1) + " mm\n";
+    text += "金物: " + flushValue.toFixed(1) + " mm\n";
+  } else {
+    text += "※ 必要項目を入力してください\n";
+  }
+  text += "\n";
+
+  text += "■ 金物位置まとめ\n";
+  if (topDim > 0) text += "上丁番: " + topDim.toFixed(1) + " mm\n";
+  if (bottomDim > 0) text += "下丁番: " + bottomDim.toFixed(1) + " mm\n";
+  if (strikeResult > 0) text += "ストライク下端: " + strikeResult.toFixed(1) + " mm\n";
+  if (strikeTop > 0) text += "ストライク上端: " + strikeTop.toFixed(1) + " mm\n";
+  if (strikeCenter > 0) text += "ストライク中心: " + strikeCenter.toFixed(1) + " mm\n";
+  if (flushResult > 0) text += "フランス落とし: " + flushResult.toFixed(1) + " mm\n";
+
+  result.textContent = text;
+
+  const quick = document.getElementById("quickResult");
+  const parts = [];
+  if (topDim > 0) parts.push("上丁番 " + topDim.toFixed(1));
+  if (bottomDim > 0) parts.push("下丁番 " + bottomDim.toFixed(1));
+  if (strikeResult > 0) parts.push("ストライク " + strikeResult.toFixed(1));
+  if (flushResult > 0) parts.push("フランス " + flushResult.toFixed(1));
+  if (spacer > 0) parts.push("スペーサー " + spacer.toFixed(1));
+  quick.textContent = parts.length ? parts.join(" / ") + " mm" : "未入力";
+
+  guideFlow();
+}
+
+function attachInputSanitizer(el) {
+  el.addEventListener("input", e => {
+    if (e.target.tagName === "INPUT" && !e.target.readOnly) {
+      const isNameField = ["newHingeName", "newStrikeName", "newFlushName", "manageName"].includes(e.target.id);
+      if (!isNameField) {
+        e.target.value = normalizeNumberInputValue(e.target.value);
+      } else {
+        e.target.value = toHalfWidth(e.target.value);
+      }
+      e.target.classList.add("input-flash");
+      setTimeout(() => e.target.classList.remove("input-flash"), 220);
+    }
+    calc();
+  });
+
+  el.addEventListener("change", () => calc());
+}
+
+document.querySelectorAll("input, select").forEach(attachInputSanitizer);
+
+const flowOrder = [
+  "topMituke","topGap","topBase",
+  "bottomSill1","bottomSill2","bottomGap","bottomBase",
+  "dh","hingeCount"
+];
+
+flowOrder.forEach((id, index) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const next = flowOrder[index + 1];
+      if (next && document.getElementById(next)) {
+        document.getElementById(next).focus();
+      }
+    }
+  });
+});
+
+function guideFlow() {
+  let found = false;
+  flowOrder.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove("input-highlight");
+    if (!found && !el.value) {
+      el.classList.add("input-highlight");
+      found = true;
+    }
+  });
+}
+
+function scrollToGuide() {
+  for (const id of flowOrder) {
+    const el = document.getElementById(id);
+    if (el && !el.value) {
+      el.focus();
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+  }
+}
+
+function presetDoor() {
+  document.getElementById("topGap").value = "3";
+  document.getElementById("bottomGap").value = "3";
+  document.getElementById("topBase").value = "150";
+  document.getElementById("bottomBase").value = "150";
+  calc();
+}
+
+function presetFrame() {
+  document.getElementById("topMituke").value = "25";
+  document.getElementById("bottomSill1").value = "12";
+  document.getElementById("bottomSill2").value = "3";
+  calc();
+}
+
+async function copyResult() {
+  const text = document.getElementById("resultText").textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    const toast = document.getElementById("toast");
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1500);
+  } catch {}
+}
+
+document.getElementById("addHingeBtn").addEventListener("click", addHingeFromTab);
+document.getElementById("addStrikeBtn").addEventListener("click", addStrikeFromTab);
+document.getElementById("addFlushBtn").addEventListener("click", addFlushFromTab);
+
+document.getElementById("manageSaveBtn").addEventListener("click", saveManageEdit);
+document.getElementById("manageCancelBtn").addEventListener("click", () => {
+  clearManageEdit();
+  clearMessage("manageMessage");
+});
+
+function registerServiceWorker() {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  }
+}
+
+loadSavedHinges();
+loadHingeOptions();
+loadSavedStrikes();
+loadStrikeOptions();
+loadSavedFlushes();
+loadFlushOptions();
+refreshAllLists();
+clearManageEdit();
+calc();
+registerServiceWorker();
+</script>
+</body>
+</html>
