@@ -1716,5 +1716,39 @@ window.addEventListener("scroll", () => {
   lastY = y;
 });
 </script>
+  <script>
+  // いままでのJS
+  loadSavedHinges();
+  loadHingeOptions();
+  loadSavedStrikes();
+  loadStrikeOptions();
+  loadSavedFlushes();
+  loadFlushOptions();
+  refreshAllLists();
+  clearManageEdit();
+  calc();
+
+  let lastY = 0;
+  const tabBar = document.querySelector(".tab-bar");
+  window.addEventListener("scroll", () => {
+    const y = window.pageYOffset;
+    if (y > lastY && y > 80) {
+      tabBar.style.transform = "translateY(-120%)";
+    } else {
+      tabBar.style.transform = "translateY(0)";
+    }
+    lastY = y;
+  });
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js")
+      .then(() => {
+        console.log("SW登録OK");
+      })
+      .catch(err => {
+        console.log("SW登録失敗", err);
+      });
+  }
+</script>
 </body>
 </html>
