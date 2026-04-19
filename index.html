@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#222222">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
 <title>丁番・ストライク・フランス落とし位置計算</title>
 
 <style>
@@ -79,7 +80,7 @@ h3 {
   line-height: 1.3;
 }
 
-input, select, button {
+input, select, button, textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 7px 5px;
@@ -87,7 +88,7 @@ input, select, button {
   text-align: center;
   border-radius: 10px;
   border: 1px solid #c9c9c9;
-  font-size: 16px;
+  font-size: 16px !important;
   background: #fff;
   color: #222;
   appearance: none;
@@ -166,9 +167,6 @@ button:disabled {
   background: var(--bg);
   padding-bottom: 8px;
   transition: transform .25s ease;
-}
-.tab-bar.hide {
-  transform: translateY(-120%);
 }
 
 .tab-btn {
@@ -426,7 +424,7 @@ details.manage-section[open] summary {
 
   input, select, button {
     min-height: 36px;
-    font-size: 16px;
+    font-size: 16px !important;
     padding: 6px 4px;
   }
 
@@ -840,8 +838,8 @@ details.manage-section[open] summary {
 
     <div class="card">
       <div class="small">
-        このタブで金物データを共有できます。<br>
-        一般の人は「更新」だけでOKです。
+        一般の人は「更新」だけでOKです。<br>
+        管理者は「データコピー」→「GitHub編集」で data.json を更新してください。
       </div>
 
       <div class="formula-grid-3">
@@ -871,8 +869,9 @@ details.manage-section[open] summary {
   <div id="resultText" class="result-card">※ 必要項目を入力してください</div>
 
   <div class="footer-note">
-    ※ 共有データは data.json を使用<br>
-    ※ GitHubで data.json を更新すると、他の人は「更新」で反映できます
+    ※ タブは下スクロールで隠れます<br>
+    ※ 枠板厚は 1.6 / 2.3 の選択式です<br>
+    ※ 共有データは data.json を使います
   </div>
 
 </div>
@@ -1705,16 +1704,16 @@ refreshAllLists();
 clearManageEdit();
 calc();
 
-let lastScroll = 0;
+let lastY = 0;
 const tabBar = document.querySelector(".tab-bar");
 window.addEventListener("scroll", () => {
-  const current = window.scrollY;
-  if (current > lastScroll && current > 100) {
-    tabBar.classList.add("hide");
+  const y = window.pageYOffset;
+  if (y > lastY && y > 80) {
+    tabBar.style.transform = "translateY(-120%)";
   } else {
-    tabBar.classList.remove("hide");
+    tabBar.style.transform = "translateY(0)";
   }
-  lastScroll = current;
+  lastY = y;
 });
 </script>
 </body>
