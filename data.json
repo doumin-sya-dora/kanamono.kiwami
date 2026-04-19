@@ -1,0 +1,14 @@
+{
+  "hinges": [
+    { "name": "DH-508S（3+12）", "value": 15, "isDefault": true },
+    { "name": "401-SL501（1+13）", "value": 14, "isDefault": true }
+  ],
+  "strikes": [
+    { "name": "LA", "offset": 22.5, "height": 110, "thickness": 2.5, "isDefault": true }
+  ],
+  "flushes": [
+    { "name": "DE6VN", "value": 18.5, "isDefault": true },
+    { "name": "DC800", "value": 20.5, "isDefault": true }
+  ],
+  "updatedAt": ""
+}
