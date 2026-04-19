@@ -1,22 +1,23 @@
-const CACHE_NAME = "hinge-tool-v1.0.0";
-const URLS_TO_CACHE = [
+const CACHE_NAME = "kanamono-v2";
+const urlsToCache = [
   "./",
-  "./index.html",
-  "./manifest.json"
+  "./index.html"
 ];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(URLS_TO_CACHE))
-  );
+// 初回キャッシュ
+self.addEventListener("install", event => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+  );
 });
 
-self.addEventListener("activate", (event) => {
+// 古いキャッシュ削除
+self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then((keys) =>
+    caches.keys().then(keys =>
       Promise.all(
-        keys.map((key) => {
+        keys.map(key => {
           if (key !== CACHE_NAME) {
             return caches.delete(key);
           }
@@ -27,21 +28,26 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
+// fetch制御
+self.addEventListener("fetch", event => {
+  const req = event.request;
 
+  // data.json は常に最新
+  if (req.url.includes("data.json")) {
+    event.respondWith(fetch(req));
+    return;
+  }
+
+  // HTMLはネット優先
+  if (req.mode === "navigate") {
+    event.respondWith(
+      fetch(req).catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
+  // その他はキャッシュ優先
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request)
-        .then((response) => {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => caches.match("./index.html"));
-    })
+    caches.match(req).then(res => res || fetch(req))
   );
 });
